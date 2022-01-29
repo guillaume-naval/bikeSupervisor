@@ -46,14 +46,14 @@
                 ></i>
                 <i
                   v-else-if="
-                    infoContent.battery_level > 40 &&
+                    infoContent.battery_level > 39 &&
                     infoContent.battery_level < 60
                   "
                   class="fas fa-battery-half"
                 ></i>
                 <i
                   v-else-if="
-                    infoContent.battery_level > 60 &&
+                    infoContent.battery_level > 59 &&
                     infoContent.battery_level < 95
                   "
                   class="fas fa-battery-three-quarters"
@@ -97,7 +97,7 @@
         </div>
       </gmap-info-window>
     </GmapMap>
-    <RightDrawer :open="openRightDrawer" />
+    <RightDrawer :open="openRightDrawer" :currentBike="infoContent" />
   </v-main>
 </template>
  
@@ -187,19 +187,7 @@ export default {
         this.infoCurrentKey = key;
       }
     },
-    async updateBike() {
-      try {
-        let res = await fetch("http://localhost:8080/wp-json/api/v1/skills", {
-          method: "PUT",
-          mode: "cors",
-          cache: "default",
-          body: JSON.stringify(this.updateForm),
-        });
-        this.data = res;
-      } catch (err) {
-        console.log(err);
-      }
-    },
+
     deleteBike(id) {
       this.infoOpened = false;
       let confirmUserDeletion = confirm(
@@ -236,7 +224,7 @@ p {
 div ::v-deep .gm-ui-hover-effect {
   display: none !important;
 }
-.fa-eraser,
+.fa-edit,
 .fa-trash-alt {
   font-size: 1.2em;
   cursor: pointer;

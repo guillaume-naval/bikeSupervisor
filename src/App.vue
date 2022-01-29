@@ -12,8 +12,10 @@
             <span class="font-weight-bold">tous leurs états </span>!
           </p>
           <p>Vous pouvez voir plus de détails sur le projet sur le lien :</p>
-          <a href="https://github.com/pulilab/vue-people" target="_blank"
-            >https://github.com/pulilab/vue-people
+          <a
+            href="https://github.com/guillaume-naval/bikeSupervisor"
+            target="_blank"
+            >https://github.com/guillaume-naval/bikeSupervisor
           </a>
         </div>
       </div>
@@ -49,5 +51,10 @@ export default {
 }
 .main-content {
   height: 100%;
+}
+@media screen and (max-width: 1000px) {
+  .left-side {
+    display: none;
+  }
 }
 </style>
