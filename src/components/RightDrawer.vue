@@ -106,6 +106,7 @@ export default {
         );
         this.data = res;
         console.log(res);
+        alert("Le vélo n°" + this.currentBike.serial_number + " a été modifié");
       } catch (err) {
         console.log(err);
       }

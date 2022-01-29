@@ -140,7 +140,6 @@ export default {
           height: -50,
         },
       },
-      updateForm: null,
     };
   },
   methods: {
@@ -187,7 +186,6 @@ export default {
         this.infoCurrentKey = key;
       }
     },
-
     deleteBike(id) {
       this.infoOpened = false;
       let confirmUserDeletion = confirm(
@@ -203,6 +201,7 @@ export default {
         }
         this.fetchData();
       }
+      alert("Le vélo a été supprimé !");
     },
   },
 };
