@@ -97,7 +97,11 @@
         </div>
       </gmap-info-window>
     </GmapMap>
-    <RightDrawer :open="openRightDrawer" :currentBike="infoContent" />
+    <RightDrawer
+      @closeDrawer="openRightDrawer = !openRightDrawer"
+      :open="openRightDrawer"
+      :currentBike="infoContent"
+    />
   </v-main>
 </template>
  
@@ -143,6 +147,7 @@ export default {
     };
   },
   methods: {
+    // Récupération des données sur les vélos à partir de l'API
     fetchData() {
       fetch("https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/")
         .then(async (response) => {
@@ -160,6 +165,7 @@ export default {
           console.error("There was an error!", error);
         });
     },
+    // Attribution d'une icône en fonction du statut du vélo
     markerIcon: function (bike) {
       if (bike.service_status === 1) {
         return this.bikeMarkerFree;
@@ -169,13 +175,14 @@ export default {
         return this.bikeMarkerInUse;
       }
     },
+    // Retourne la position du marker à partir des coordonnées du vélo
     getPosition: function (marker) {
-      console.log(marker);
       return {
         lat: parseFloat(marker.coordinates[1]),
         lng: parseFloat(marker.coordinates[0]),
       };
     },
+    // Gestion de l'infobulle des vélos
     toggleInfo: function (bike, key) {
       this.infoPosition = this.getPosition(bike.location);
       this.infoContent = bike;
@@ -186,6 +193,7 @@ export default {
         this.infoCurrentKey = key;
       }
     },
+    // Fonction pour supprimer un vélo
     deleteBike(id) {
       this.infoOpened = false;
       let confirmUserDeletion = confirm(

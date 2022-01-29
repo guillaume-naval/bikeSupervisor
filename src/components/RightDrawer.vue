@@ -63,9 +63,7 @@
       >
         Enregistrer
       </v-btn>
-      <v-btn color="error" class="mr-4 mt-5" v-if="isEditing" @click="cancel"
-        >Annuler</v-btn
-      >
+      <v-btn color="error" class="mr-4 mt-5" @click="close()">Fermer</v-btn>
     </form>
   </v-navigation-drawer>
 </template>
@@ -89,11 +87,9 @@ export default {
     };
   },
   methods: {
+    // Enregistrer les modifications faites sur le vélo
     async save(id) {
       try {
-        console.log(JSON.stringify(this.currentBike));
-        console.log(this.currentBike.service_status);
-        console.log(id);
         let res = await fetch(
           `https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/` + id,
           {
@@ -106,13 +102,17 @@ export default {
         );
         this.data = res;
         console.log(res);
+        this.$emit("closeDrawer");
+        this.isEditing = false;
         alert("Le vélo n°" + this.currentBike.serial_number + " a été modifié");
       } catch (err) {
         console.log(err);
       }
     },
-    cancel() {
-      this.drawerOpen = false;
+    // Envoie au parent un appel pour la fermeture du volet droit
+    close() {
+      this.isEditing = false;
+      this.$emit("closeDrawer");
     },
   },
   watch: {
