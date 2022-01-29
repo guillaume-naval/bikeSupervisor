@@ -1,9 +1,23 @@
 <template>
-  <div>
-    <GmapMap :zoom="12" :center="center" style="width: 1280px; height: 720px">
+  <v-main class="pa-0 ma-0">
+    <GmapMap
+      @click="infoOpened = false"
+      :zoom="11"
+      :center="center"
+      style="width: 100%; height: 100%"
+      :options="{
+        zoomControl: true,
+        mapTypeControl: false,
+        scaleControl: false,
+        streetViewControl: false,
+        rotateControl: false,
+        fullscreenControl: false,
+        disableDefaultUi: false,
+      }"
+    >
       <GmapMarker
         v-for="(bike, key) in bikes"
-        :key="key"
+        :key="bike.id"
         :position="getPosition(bike.location)"
         :clickable="true"
         @click="toggleInfo(bike, key)"
@@ -15,62 +29,95 @@
         :opened="infoOpened"
         @closeclick="infoOpened = false"
         v-if="infoContent"
-        >Vélo n°{{ infoContent.serial_number }}
-        <br />
-        Niveau de batterie : {{ infoContent.battery_level }} %
-        <br />
-        <span v-if="infoContent.service_status === 1">Disponible</span>
-        <span v-else-if="infoContent.service_status === 2">Réservé</span>
-        <span v-else>En utilisation</span>
+      >
+        <div>
+          <div class="d-flex">
+            <div class="d-flex flex-column mr-2">
+              <span class="font-weight-bold"
+                >Vélo n°{{ infoContent.serial_number }}</span
+              >
+              <span>
+                <i
+                  v-if="
+                    infoContent.battery_level < 40 &&
+                    infoContent.battery_level != 0
+                  "
+                  class="fas fa-battery-quarter"
+                ></i>
+                <i
+                  v-else-if="
+                    infoContent.battery_level > 40 &&
+                    infoContent.battery_level < 60
+                  "
+                  class="fas fa-battery-half"
+                ></i>
+                <i
+                  v-else-if="
+                    infoContent.battery_level > 60 &&
+                    infoContent.battery_level < 95
+                  "
+                  class="fas fa-battery-three-quarters"
+                ></i>
+                <i
+                  v-else-if="infoContent.battery_level == 0"
+                  class="fas fa-battery-empty"
+                ></i>
+                <i v-else class="fas fa-battery-full"></i>
+
+                {{ infoContent.battery_level }} %
+              </span>
+              <p
+                v-if="infoContent.service_status === 1"
+                class="txt-green font-weight-bold"
+              >
+                Disponible
+              </p>
+              <p
+                v-else-if="infoContent.service_status === 2"
+                class="txt-orange font-weight-bold"
+              >
+                Réservé
+              </p>
+              <p v-else class="txt-red font-weight-bold">En utilisation</p>
+            </div>
+            <span class="d-flex flex-column justify-space-between">
+              <i
+                class="far fa-edit"
+                @click.stop="openRightDrawer = !openRightDrawer"
+              ></i
+              ><i
+                class="fas fa-trash-alt"
+                @click="
+                  deleteBike(infoContent.id, infoOpened);
+                  fetchData();
+                "
+              ></i>
+            </span>
+          </div>
+        </div>
       </gmap-info-window>
     </GmapMap>
-  </div>
+    <RightDrawer :open="openRightDrawer" />
+  </v-main>
 </template>
  
 <script>
+import RightDrawer from "./RightDrawer";
 export default {
   name: "AddMap",
+
+  components: {
+    RightDrawer,
+  },
   data() {
     return {
+      openRightDrawer: false,
+      data: this.fetchData(),
       center: {
-        lat: 48.863802704745304,
-        lng: 2.3370770185405605,
+        lat: 48.769097,
+        lng: 2.329759,
       },
-      bikes: [
-        {
-          battery_level: 85,
-          service_status: 1,
-          in_order: true,
-          location: {
-            coordinates: [2.30082, 48.7546],
-            type: "Point",
-          },
-          serial_number: "AZX76B",
-          id: "507f1f77bcf86cd799439011",
-        },
-        {
-          battery_level: 77,
-          service_status: 3,
-          in_order: true,
-          location: {
-            coordinates: [2.30091, 48.765],
-            type: "Point",
-          },
-          serial_number: "P3DB6F",
-          id: "cf38d99b87664e7a80565ffb",
-        },
-        {
-          battery_level: 67,
-          service_status: 2,
-          in_order: false,
-          location: {
-            coordinates: [2.32145, 48.7566],
-            type: "Point",
-          },
-          serial_number: "KAYO32",
-          id: "c1eeea27a5c340c4bd0fda2c",
-        },
-      ],
+      bikes: [],
       bikeMarkerFree: {
         url: require("../assets/bicycle_free.png"),
         scaledSize: { width: 65, height: 65, f: "px", b: "px" },
@@ -93,9 +140,27 @@ export default {
           height: -50,
         },
       },
+      updateForm: null,
     };
   },
   methods: {
+    fetchData() {
+      fetch("https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/")
+        .then(async (response) => {
+          const data = await response.json();
+          if (!response.ok) {
+            const error = (data && data.message) || response.statusText;
+            return Promise.reject(error);
+          }
+
+          this.bikes = data.bikes;
+          console.log(this.bikes);
+        })
+        .catch((error) => {
+          this.errorMessage = error;
+          console.error("There was an error!", error);
+        });
+    },
     markerIcon: function (bike) {
       if (bike.service_status === 1) {
         return this.bikeMarkerFree;
@@ -122,6 +187,62 @@ export default {
         this.infoCurrentKey = key;
       }
     },
+    async updateBike() {
+      try {
+        let res = await fetch("http://localhost:8080/wp-json/api/v1/skills", {
+          method: "PUT",
+          mode: "cors",
+          cache: "default",
+          body: JSON.stringify(this.updateForm),
+        });
+        this.data = res;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    deleteBike(id) {
+      this.infoOpened = false;
+      let confirmUserDeletion = confirm(
+        "Voulez-vous vraiment supprimer ce vélo ?"
+      );
+      if (confirmUserDeletion == true) {
+        try {
+          fetch("https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/" + id, {
+            method: "DELETE",
+          });
+        } catch (err) {
+          console.log(err);
+        }
+        this.fetchData();
+      }
+    },
   },
 };
 </script>
+
+<style scoped>
+.txt-red {
+  color: #f32a2a;
+}
+.txt-green {
+  color: #05af0a;
+}
+.txt-orange {
+  color: #f3882a;
+}
+p {
+  margin: 0px !important;
+}
+div ::v-deep .gm-ui-hover-effect {
+  display: none !important;
+}
+.fa-eraser,
+.fa-trash-alt {
+  font-size: 1.2em;
+  cursor: pointer;
+}
+.fa-trash-alt:hover,
+.fa-edit:hover {
+  color: rgb(0, 174, 255);
+}
+</style>

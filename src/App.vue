@@ -1,30 +1,24 @@
 <template>
   <v-app>
-    <v-app-bar app color="primary" dark>
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
+    <div class="main-content d-flex ma-0 pa-0">
+      <div class="left-side">
+        <div class="intro-text pa-10">
+          <img src="./assets/logo.png" alt="logo ZS" class="logo mb-5" />
 
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
+          <h2 class="mb-3">Bienvenue ! <v-icon>mdi-bike</v-icon></h2>
+
+          <p>
+            Zoov supervisor permet d'observer les vélos en service dans
+            <span class="font-weight-bold">tous leurs états </span>!
+          </p>
+          <p>Vous pouvez voir plus de détails sur le projet sur le lien :</p>
+          <a href="https://github.com/pulilab/vue-people" target="_blank"
+            >https://github.com/pulilab/vue-people
+          </a>
+        </div>
       </div>
-    </v-app-bar>
-
-    <v-main>
       <AddMap />
-    </v-main>
+    </div>
   </v-app>
 </template>
 
@@ -38,8 +32,22 @@ export default {
     AddMap,
   },
 
-  data: () => ({
-    //
-  }),
+  data() {
+    return {};
+  },
 };
 </script>
+
+<style>
+.logo {
+  width: 220px;
+}
+.left-side {
+  max-width: 300px;
+  z-index: 2;
+  box-shadow: 5px 0px 5px 0px rgba(0, 0, 0, 0.151);
+}
+.main-content {
+  height: 100%;
+}
+</style>
