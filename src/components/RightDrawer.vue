@@ -4,7 +4,7 @@
     v-model="drawerOpen"
     absolute
     right
-    width="40%"
+    width="45%"
   >
     <form v-if="currentBike" class="pa-5">
       <h3 class="font-weight-medium mb-10">Vélo à modifier</h3>

@@ -208,8 +208,8 @@ export default {
           console.log(err);
         }
         this.fetchData();
+        alert("Le vélo a été supprimé !");
       }
-      alert("Le vélo a été supprimé !");
     },
   },
 };
