@@ -9,21 +9,21 @@
     <form v-if="currentBike" class="pa-5">
       <h3 class="font-weight-medium mb-10">Vélo à modifier</h3>
       <v-text-field
-        v-model="currentBike.location.coordinates[0]"
-        label="Lng"
+        v-model="longitude"
+        label="Longitude"
         required
         :disabled="!isEditing"
         :class="{ view: !isEditing }"
       ></v-text-field>
       <v-text-field
-        v-model="currentBike.location.coordinates[1]"
-        label="Lat"
+        v-model="latitude"
+        label="Latitude"
         required
         :disabled="!isEditing"
         :class="{ view: !isEditing }"
       ></v-text-field>
       <v-text-field
-        v-model="currentBike.serial_number"
+        v-model="serial_number"
         :disabled="!isEditing"
         :class="{ view: !isEditing }"
         label="Numéro de Série"
@@ -32,7 +32,7 @@
       <v-select
         hint="1 = Libre, 2 = Réservé, 3 = En utilisation"
         persistent-hint
-        v-model="currentBike.service_status"
+        v-model="service_status"
         :items="items"
         label="État"
         required
@@ -41,7 +41,7 @@
       <v-subheader class="ma-0 pa-0">Batterie</v-subheader>
       <v-slider
         :disabled="!isEditing"
-        v-model="currentBike.battery_level"
+        v-model="battery_level"
         thumb-color="blue"
         thumb-label="always"
         thumb-size="24"
@@ -50,7 +50,10 @@
       <v-btn
         class="mr-4 mt-5"
         color="warning"
-        @click="isEditing = !isEditing"
+        @click="
+          isEditing = !isEditing;
+          initFormValues();
+        "
         v-if="!isEditing"
       >
         Modifier
@@ -72,7 +75,7 @@
 export default {
   name: "RightDrawer",
   props: {
-    currentBike: {},
+    currentBike: Object,
     open: {
       type: Boolean,
       default: false,
@@ -81,12 +84,38 @@ export default {
 
   data() {
     return {
+      longitude: null,
+      latitude: null,
+      serial_number: null,
+      service_status: null,
+      battery_level: null,
       drawerOpen: this.open,
       isEditing: false,
       items: [1, 2, 3],
     };
   },
+
   methods: {
+    initFormValues() {
+      console.log(this.currentBike);
+      if (this.currentBike) {
+        this.longitude = this.currentBike
+          ? this.currentBike.location.coordinates[0]
+          : "";
+        this.latitude = this.currentBike
+          ? this.currentBike.location.coordinates[1]
+          : "";
+        this.serial_number = this.currentBike
+          ? this.currentBike.serial_number
+          : "";
+        this.service_status = this.currentBike
+          ? this.currentBike.service_status
+          : "";
+        this.battery_level = this.currentBike
+          ? this.currentBike.battery_level
+          : "";
+      }
+    },
     // Enregistrer les modifications faites sur le vélo
     async save(id) {
       try {
@@ -97,12 +126,21 @@ export default {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(this.currentBike),
+            body: JSON.stringify({
+              serial_number: this.serial_number,
+              location: {
+                coordinates: [this.longitude, this.latitude],
+              },
+              service_status: this.service_status,
+              battery_level: this.battery_level,
+            }),
           }
         );
         this.data = res;
         console.log(res);
+        this.$emit("dataSaved");
         this.$emit("closeDrawer");
+
         this.isEditing = false;
         alert("Le vélo n°" + this.currentBike.serial_number + " a été modifié");
       } catch (err) {

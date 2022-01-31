@@ -99,8 +99,10 @@
     </GmapMap>
     <RightDrawer
       @closeDrawer="openRightDrawer = !openRightDrawer"
+      @dataSaved="fetchData()"
       :open="openRightDrawer"
       :currentBike="infoContent"
+      ref="RightDrawer"
     />
   </v-main>
 </template>
@@ -149,6 +151,7 @@ export default {
   methods: {
     // Récupération des données sur les vélos à partir de l'API
     fetchData() {
+      this.infoOpened = false;
       fetch("https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/")
         .then(async (response) => {
           const data = await response.json();
@@ -195,11 +198,11 @@ export default {
     },
     // Fonction pour supprimer un vélo
     deleteBike(id) {
-      this.infoOpened = false;
       let confirmUserDeletion = confirm(
         "Voulez-vous vraiment supprimer ce vélo ?"
       );
       if (confirmUserDeletion == true) {
+        this.infoOpened = false;
         try {
           fetch("https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/" + id, {
             method: "DELETE",
