@@ -6,7 +6,7 @@
     right
     width="45%"
   >
-    <form v-if="currentBike" class="pa-5" ref="form">
+    <v-form v-if="currentBike" class="pa-5" ref="form">
       <h3 class="font-weight-medium mb-10">Vélo à modifier</h3>
       <v-text-field
         v-model="longitude"
@@ -70,7 +70,7 @@
         Enregistrer
       </v-btn>
       <v-btn color="error" class="mr-4 mt-5" @click="close()">Fermer</v-btn>
-    </form>
+    </v-form>
   </v-navigation-drawer>
 </template>
 
@@ -87,6 +87,7 @@ export default {
 
   data() {
     return {
+      valid: true,
       longitude: null,
       latitude: null,
       serial_number: null,
@@ -105,7 +106,7 @@ export default {
       var ck_lat = /^-?([1-8]?\d(?:\.\d{1,})?|90(?:\.0{1,6})?)$/;
       const rule = (v) =>
         ck_lat.test(v || "") ||
-        "Latitude is not valid. Must be between -90 and 90";
+        "La latitude n'est pas valide. Elle doit être située entre -90 et 90";
       rules.push(rule);
       return rules;
     },
@@ -114,7 +115,7 @@ export default {
       var ck_lng = /^-?((?:1[0-7]|[1-9])?\d(?:\.\d{1,})?|180(?:\.0{1,})?)$/;
       const rule = (v) =>
         ck_lng.test(v || "") ||
-        "Longitude is not valid. Must be between -180 and 180";
+        "La longitude n'est pas valide. Elle doit être située entre -180 et 180";
       rules.push(rule);
       return rules;
     },
@@ -124,14 +125,14 @@ export default {
       if (this.min) {
         const rule = (v) =>
           (v || "").length >= this.min ||
-          `A minimum of ${this.min} characters is required`;
+          `Entrer un minimium de ${this.min} caractères`;
 
         rules.push(rule);
       }
 
       if (!this.allowSpaces) {
         const rule = (v) =>
-          (v || "").indexOf(" ") < 0 || "No spaces are allowed";
+          (v || "").indexOf(" ") < 0 || "Les espaces ne sont pas autorisés";
 
         rules.push(rule);
       }
@@ -139,8 +140,12 @@ export default {
     },
   },
   methods: {
-    validateField() {
-      this.$refs.form.validate();
+    validateForm() {
+      if (this.$refs.form.validate()) {
+        return true;
+      } else {
+        alert("Certains champs de texte sont invalides");
+      }
     },
     initFormValues() {
       console.log(this.currentBike);
@@ -165,30 +170,34 @@ export default {
     // Enregistrer les modifications faites sur le vélo
     async save(id) {
       try {
-        let res = await fetch(
-          `https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/` + id,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              serial_number: this.serial_number,
-              location: {
-                coordinates: [this.longitude, this.latitude],
+        if (this.validateForm()) {
+          let res = await fetch(
+            `https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/` + id,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
               },
-              service_status: this.service_status,
-              battery_level: this.battery_level,
-            }),
-          }
-        );
-        this.data = res;
-        console.log(res);
-        this.$emit("dataSaved");
-        this.$emit("closeDrawer");
+              body: JSON.stringify({
+                serial_number: this.serial_number,
+                location: {
+                  coordinates: [this.longitude, this.latitude],
+                },
+                service_status: this.service_status,
+                battery_level: this.battery_level,
+              }),
+            }
+          );
+          this.data = res;
+          console.log(res);
+          this.$emit("dataSaved");
+          this.$emit("closeDrawer");
 
-        this.isEditing = false;
-        alert("Le vélo n°" + this.currentBike.serial_number + " a été modifié");
+          this.isEditing = false;
+          alert(
+            "Le vélo n°" + this.currentBike.serial_number + " a été modifié"
+          );
+        }
       } catch (err) {
         console.log(err);
       }
@@ -203,9 +212,6 @@ export default {
     open(newVal) {
       this.drawerOpen = newVal;
     },
-    match: "validateField",
-    max: "validateField",
-    model: "validateField",
   },
 };
 </script>
