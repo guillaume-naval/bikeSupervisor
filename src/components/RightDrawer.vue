@@ -6,7 +6,7 @@
     right
     width="45%"
   >
-    <form v-if="currentBike" class="pa-5">
+    <form v-if="currentBike" class="pa-5" ref="form">
       <h3 class="font-weight-medium mb-10">Vélo à modifier</h3>
       <v-text-field
         v-model="longitude"
@@ -14,6 +14,7 @@
         required
         :disabled="!isEditing"
         :class="{ view: !isEditing }"
+        :rules="longitudeRules"
       ></v-text-field>
       <v-text-field
         v-model="latitude"
@@ -21,6 +22,7 @@
         required
         :disabled="!isEditing"
         :class="{ view: !isEditing }"
+        :rules="latitudeRules"
       ></v-text-field>
       <v-text-field
         v-model="serial_number"
@@ -28,6 +30,7 @@
         :class="{ view: !isEditing }"
         label="Numéro de Série"
         required
+        :rules="serialRules"
       ></v-text-field>
       <v-select
         hint="1 = Libre, 2 = Réservé, 3 = En utilisation"
@@ -92,10 +95,53 @@ export default {
       drawerOpen: this.open,
       isEditing: false,
       items: [1, 2, 3],
+      allowSpaces: false,
+      min: 4,
     };
   },
+  computed: {
+    latitudeRules() {
+      const rules = [];
+      var ck_lat = /^-?([1-8]?\d(?:\.\d{1,})?|90(?:\.0{1,6})?)$/;
+      const rule = (v) =>
+        ck_lat.test(v || "") ||
+        "Latitude is not valid. Must be between -90 and 90";
+      rules.push(rule);
+      return rules;
+    },
+    longitudeRules() {
+      const rules = [];
+      var ck_lng = /^-?((?:1[0-7]|[1-9])?\d(?:\.\d{1,})?|180(?:\.0{1,})?)$/;
+      const rule = (v) =>
+        ck_lng.test(v || "") ||
+        "Longitude is not valid. Must be between -180 and 180";
+      rules.push(rule);
+      return rules;
+    },
+    serialRules() {
+      const rules = [];
 
+      if (this.min) {
+        const rule = (v) =>
+          (v || "").length >= this.min ||
+          `A minimum of ${this.min} characters is required`;
+
+        rules.push(rule);
+      }
+
+      if (!this.allowSpaces) {
+        const rule = (v) =>
+          (v || "").indexOf(" ") < 0 || "No spaces are allowed";
+
+        rules.push(rule);
+      }
+      return rules;
+    },
+  },
   methods: {
+    validateField() {
+      this.$refs.form.validate();
+    },
     initFormValues() {
       console.log(this.currentBike);
       if (this.currentBike) {
@@ -157,6 +203,9 @@ export default {
     open(newVal) {
       this.drawerOpen = newVal;
     },
+    match: "validateField",
+    max: "validateField",
+    model: "validateField",
   },
 };
 </script>
