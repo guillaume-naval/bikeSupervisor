@@ -172,7 +172,7 @@ export default {
       try {
         if (this.validateForm()) {
           let res = await fetch(
-            `https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/` + id,
+            `https://622791f4d1b3ff08c1b38f15.mockapi.io/bikes/` + id,
             {
               method: "PUT",
               headers: {

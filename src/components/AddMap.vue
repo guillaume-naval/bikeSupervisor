@@ -152,7 +152,7 @@ export default {
     // Récupération des données sur les vélos à partir de l'API
     fetchData() {
       this.infoOpened = false;
-      fetch("https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/")
+      fetch("https://622791f4d1b3ff08c1b38f15.mockapi.io/bikes/")
         .then(async (response) => {
           const data = await response.json();
           if (!response.ok) {
@@ -204,7 +204,7 @@ export default {
       if (confirmUserDeletion == true) {
         this.infoOpened = false;
         try {
-          fetch("https://61c331d69cfb8f0017a3ea05.mockapi.io/bikes/" + id, {
+          fetch("https://622791f4d1b3ff08c1b38f15.mockapi.io/bikes/" + id, {
             method: "DELETE",
           });
         } catch (err) {
